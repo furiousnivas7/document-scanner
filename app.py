@@ -12,6 +12,28 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+from flask import send_from_directory
+# other imports
+from fpdf import FPDF
+
+def create_pdf(image_paths, output_path):
+    pdf = FPDF()
+    for image_path in image_paths:
+        try:
+            cover = Image.open(image_path)
+            width, height = cover.size
+            pdf.add_page()
+            # Assuming images are not larger than A4 size, adjust as needed
+            pdf.image(image_path, 10, 10, 200)  # Sizes can be adjusted based on your need
+        except Exception as e:
+            print(f"Failed to process {image_path}: {e}")
+    pdf.output(output_path, "F")
+
+@app.route('/download-pdf')
+def download_pdf():
+    pdf_filename = 'document.pdf'
+    directory = os.path.join(app.config['UPLOAD_FOLDER'])
+    return send_from_directory(directory, pdf_filename, as_attachment=True)
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -26,11 +48,13 @@ def upload_file():
                 image_paths.append(file_path)
 
         # Convert to PDF
-        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], 'document.pdf')
+        pdf_filename = 'document.pdf'
+        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_filename)
         create_pdf(image_paths, pdf_path)
-        return send_from_directory(directory=os.path.dirname(pdf_path), filename=os.path.basename(pdf_path), as_attachment=True)
+        return redirect(url_for('download_pdf'))  # Redirect to download handler
     
     return render_template('index.html')
+
 
 def create_pdf(image_paths, output_path):
     pdf = FPDF()

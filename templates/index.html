@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload Document to Scan</title>
+    <title>Upload Documents</title>
 </head>
 <body>
-    <h1>Document Scanner</h1>
+    <h1>Document Scanner to PDF</h1>
     <form action="/" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required>
-        <input type="submit" value="Upload and Scan">
+        <input type="file" name="file[]" multiple required>
+        <input type="submit" value="Upload and Convert to PDF">
     </form>
 </body>
 </html>
